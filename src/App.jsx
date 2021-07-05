@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Octokit } from "@octokit/core";
+import Display from './Display.jsx'
 import '../index.css';
-const octokit = new Octokit();
 
 const App = () => {
   
@@ -9,33 +9,27 @@ const App = () => {
   const [queryResult, setQueryResult] = useState([]);
   const [sortBy, setSortBy] = useState('default');
   const [language, setLanguage] = useState('javascript');
-  const [showDetails, setShowDetails] = useState('false');
-  // state: flag to trigger conditional render of detailed result page
-  // passing down pertinent query results as props
 
   const searchSubmit = () => {
     /*
-      sort results by default best match or by stars
-      filter results by language
+      sort results by best match (default) or by stars
+      & filter results by language
     */
-    const queryString = sortBy === 'default' ? `${input} in:name language:${language}` : `${input} in:name&sort=stars language:${language}`
-    console.log(queryString)
-
+    const queryString = 
+      sortBy === 'default' 
+      ? `${input} in:name language:${language}` 
+      : `${input} in:name&sort=stars language:${language}`;
+    
+    const octokit = new Octokit();
     octokit.request('GET /search/repositories', {
       q: queryString
     })
-    .then((res) => {
-      console.log(res.data.items)
-      setQueryResult(res.data.items);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-
+    .then((res) => setQueryResult(res.data.items))
+    .catch((err) => console.log('Error querying GitHub API:' + err))
   }
 
   const toggleSort = () => {
-    setSortBy(sortBy === 'default' ? 'stars' : 'default')
+    setSortBy(sortBy === 'default' ? 'stars' : 'default');
   }
 
   return (
@@ -52,6 +46,7 @@ const App = () => {
         Search by language: 
         <input type='text' onChange={(e) => setLanguage(e.target.value)}></input>
       </div>
+      <Display data={queryResult}/>
     </div>
   );
 }
