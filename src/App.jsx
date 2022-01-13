@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Octokit } from "@octokit/core";
-import Display from './Display.jsx'
+import ResultsDisplay from './ResultsDisplay.jsx'
 import '../index.css';
 
 const App = () => {
   
   const [input, setInput] = useState('');
   const [queryResult, setQueryResult] = useState([]);
+  const [isFetching, setIsFetching] = useState(false)
   const [sortBy, setSortBy] = useState('default');
   const [language, setLanguage] = useState('javascript');
 
@@ -15,6 +16,7 @@ const App = () => {
       sort results by best match (default) or by stars
       & filter results by language
     */
+    setIsFetching(true)
     const queryString = 
       sortBy === 'default' 
       ? `${input} in:name language:${language}` 
@@ -24,7 +26,10 @@ const App = () => {
     octokit.request('GET /search/repositories', {
       q: queryString
     })
-    .then((res) => setQueryResult(res.data.items))
+    .then((res) => {
+      setIsFetching(false)
+      setQueryResult(res.data.items)
+    })
     .catch((err) => console.log('Error querying GitHub API:' + err))
   }
 
@@ -34,9 +39,12 @@ const App = () => {
 
   return (
     <div className='App'>
-      Search:<br/>
-      <input type='text' onChange={(e) => setInput(e.target.value)}></input>
-      <button onClick={searchSubmit}>Submit</button><br/>
+      <h2>GitHub Repository Search:</h2><br/>
+      <span>
+        <input type='text' onChange={(e) => setInput(e.target.value)}></input>
+        <button onClick={searchSubmit}>Search</button><br/>
+      </span>
+      <br/>
       <div id='sortBy' onClick={toggleSort}>
         Sort results by:
         <input type='radio' value='Best Match' name='sortButton' defaultChecked />Best Match
@@ -46,9 +54,18 @@ const App = () => {
         Search by language: 
         <input type='text' onChange={(e) => setLanguage(e.target.value)}></input>
       </div>
-      <Display data={queryResult}/>
+      {
+        isFetching
+          ? <Loading />
+          : <ResultsDisplay data={queryResult}/>
+      }
+      
     </div>
   );
 }
+
+const Loading = () => (
+  'LO LO LOADING'
+)
 
 export default App;

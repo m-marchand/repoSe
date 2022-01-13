@@ -1,7 +1,23 @@
-.App {
+#root {
   min-height: 100vh; /* not sure what this is */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+
+.App {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.results-view {
+
+}
+
+.new-line {
+  white-space: pre-line;
+}
+
 
